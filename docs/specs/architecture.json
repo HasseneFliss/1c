@@ -1,0 +1,29 @@
+{
+  "caching": "Redis for sessions and rate limiting",
+  "logging": "Structured JSON logging with request correlation IDs",
+  "pattern": "RESTful API with PostgreSQL",
+  "database": "PostgreSQL 14+",
+  "security": [
+    "Hash passwords with bcrypt (minimum 12 rounds)",
+    "Validate JWT tokens on protected routes",
+    "Implement CSRF protection if using cookies",
+    "Use HTTPS in production",
+    "Sanitize user inputs",
+    "Implement rate limiting per IP and user",
+    "Log security events for auditing"
+  ],
+  "monitoring": "Health checks and metrics endpoints",
+  "fileStorage": "S3-compatible storage for future file uploads",
+  "recommendations": [
+    "Use connection pooling for database connections",
+    "Implement request/response logging middleware",
+    "Add CORS middleware for browser clients",
+    "Use environment variables for configuration",
+    "Implement graceful shutdown handling",
+    "Add database migration system",
+    "Use UUID v4 for all primary keys",
+    "Implement soft delete for users if needed",
+    "Add input validation middleware",
+    "Use transaction management for data consistency"
+  ]
+}

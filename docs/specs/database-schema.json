@@ -1,0 +1,247 @@
+{
+  "tables": [
+    {
+      "name": "users",
+      "columns": [
+        {
+          "name": "id",
+          "type": "UUID",
+          "default": "gen_random_uuid()",
+          "primary": true
+        },
+        {
+          "name": "email",
+          "type": "VARCHAR(255)",
+          "unique": true,
+          "nullable": false
+        },
+        {
+          "name": "password_hash",
+          "type": "VARCHAR(255)",
+          "nullable": false
+        },
+        {
+          "name": "first_name",
+          "type": "VARCHAR(100)",
+          "nullable": false
+        },
+        {
+          "name": "last_name",
+          "type": "VARCHAR(100)",
+          "nullable": false
+        },
+        {
+          "name": "role",
+          "type": "VARCHAR(50)",
+          "default": "user",
+          "nullable": false
+        },
+        {
+          "name": "is_active",
+          "type": "BOOLEAN",
+          "default": true,
+          "nullable": false
+        },
+        {
+          "name": "last_login_at",
+          "type": "TIMESTAMP",
+          "nullable": true
+        },
+        {
+          "name": "created_at",
+          "type": "TIMESTAMP",
+          "default": "CURRENT_TIMESTAMP",
+          "nullable": false
+        },
+        {
+          "name": "updated_at",
+          "type": "TIMESTAMP",
+          "default": "CURRENT_TIMESTAMP",
+          "nullable": false
+        }
+      ],
+      "indexes": [
+        {
+          "unique": true,
+          "columns": [
+            "email"
+          ]
+        },
+        {
+          "unique": false,
+          "columns": [
+            "role"
+          ]
+        },
+        {
+          "unique": false,
+          "columns": [
+            "is_active"
+          ]
+        },
+        {
+          "unique": false,
+          "columns": [
+            "created_at"
+          ]
+        }
+      ],
+      "constraints": [
+        {
+          "type": "CHECK",
+          "definition": "role IN ('admin', 'user')"
+        }
+      ],
+      "foreignKeys": []
+    },
+    {
+      "name": "refresh_tokens",
+      "columns": [
+        {
+          "name": "id",
+          "type": "UUID",
+          "default": "gen_random_uuid()",
+          "primary": true
+        },
+        {
+          "name": "user_id",
+          "type": "UUID",
+          "nullable": false
+        },
+        {
+          "name": "token_hash",
+          "type": "VARCHAR(255)",
+          "nullable": false
+        },
+        {
+          "name": "expires_at",
+          "type": "TIMESTAMP",
+          "nullable": false
+        },
+        {
+          "name": "created_at",
+          "type": "TIMESTAMP",
+          "default": "CURRENT_TIMESTAMP",
+          "nullable": false
+        },
+        {
+          "name": "revoked_at",
+          "type": "TIMESTAMP",
+          "nullable": true
+        }
+      ],
+      "indexes": [
+        {
+          "unique": false,
+          "columns": [
+            "user_id"
+          ]
+        },
+        {
+          "unique": true,
+          "columns": [
+            "token_hash"
+          ]
+        },
+        {
+          "unique": false,
+          "columns": [
+            "expires_at"
+          ]
+        }
+      ],
+      "foreignKeys": [
+        {
+          "column": "user_id",
+          "onDelete": "CASCADE",
+          "references": "users(id)"
+        }
+      ]
+    },
+    {
+      "name": "audit_logs",
+      "columns": [
+        {
+          "name": "id",
+          "type": "UUID",
+          "default": "gen_random_uuid()",
+          "primary": true
+        },
+        {
+          "name": "user_id",
+          "type": "UUID",
+          "nullable": true
+        },
+        {
+          "name": "action",
+          "type": "VARCHAR(100)",
+          "nullable": false
+        },
+        {
+          "name": "resource_type",
+          "type": "VARCHAR(100)",
+          "nullable": false
+        },
+        {
+          "name": "resource_id",
+          "type": "VARCHAR(255)",
+          "nullable": true
+        },
+        {
+          "name": "details",
+          "type": "JSONB",
+          "nullable": true
+        },
+        {
+          "name": "ip_address",
+          "type": "INET",
+          "nullable": true
+        },
+        {
+          "name": "user_agent",
+          "type": "TEXT",
+          "nullable": true
+        },
+        {
+          "name": "created_at",
+          "type": "TIMESTAMP",
+          "default": "CURRENT_TIMESTAMP",
+          "nullable": false
+        }
+      ],
+      "indexes": [
+        {
+          "unique": false,
+          "columns": [
+            "user_id"
+          ]
+        },
+        {
+          "unique": false,
+          "columns": [
+            "action"
+          ]
+        },
+        {
+          "unique": false,
+          "columns": [
+            "resource_type"
+          ]
+        },
+        {
+          "unique": false,
+          "columns": [
+            "created_at"
+          ]
+        }
+      ],
+      "foreignKeys": [
+        {
+          "column": "user_id",
+          "onDelete": "SET NULL",
+          "references": "users(id)"
+        }
+      ]
+    }
+  ]
+}
