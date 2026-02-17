@@ -1,0 +1,1150 @@
+{
+  "summary": "Comprehensive specification for a user management REST API with JWT authentication, role-based authorization, and complete CRUD operations. Includes health monitoring, audit logging, and security best practices.",
+  "openApiSpec": {
+    "info": {
+      "title": "Application API",
+      "version": "1.0.0",
+      "description": "Complete API specification for generic application"
+    },
+    "paths": {
+      "/users": {
+        "get": {
+          "tags": [
+            "Users"
+          ],
+          "summary": "Get all users",
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "responses": {
+            "200": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/UserListResponse"
+                  }
+                }
+              },
+              "description": "Users retrieved"
+            },
+            "401": {
+              "$ref": "#/components/responses/Unauthorized"
+            },
+            "403": {
+              "$ref": "#/components/responses/Forbidden"
+            }
+          },
+          "parameters": [
+            {
+              "in": "query",
+              "name": "page",
+              "schema": {
+                "type": "integer",
+                "default": 1,
+                "minimum": 1
+              }
+            },
+            {
+              "in": "query",
+              "name": "limit",
+              "schema": {
+                "type": "integer",
+                "default": 10,
+                "maximum": 100,
+                "minimum": 1
+              }
+            },
+            {
+              "in": "query",
+              "name": "search",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "in": "query",
+              "name": "sortBy",
+              "schema": {
+                "enum": [
+                  "name",
+                  "email",
+                  "createdAt"
+                ],
+                "type": "string"
+              }
+            },
+            {
+              "in": "query",
+              "name": "sortOrder",
+              "schema": {
+                "enum": [
+                  "asc",
+                  "desc"
+                ],
+                "type": "string",
+                "default": "asc"
+              }
+            }
+          ]
+        },
+        "post": {
+          "tags": [
+            "Users"
+          ],
+          "summary": "Create new user",
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "responses": {
+            "201": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/User"
+                  }
+                }
+              },
+              "description": "User created"
+            },
+            "400": {
+              "$ref": "#/components/responses/BadRequest"
+            },
+            "401": {
+              "$ref": "#/components/responses/Unauthorized"
+            },
+            "403": {
+              "$ref": "#/components/responses/Forbidden"
+            },
+            "409": {
+              "$ref": "#/components/responses/Conflict"
+            }
+          },
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateUserRequest"
+                }
+              }
+            },
+            "required": true
+          }
+        }
+      },
+      "/health": {
+        "get": {
+          "tags": [
+            "System"
+          ],
+          "summary": "Health check",
+          "responses": {
+            "200": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "status": {
+                        "type": "string",
+                        "example": "healthy"
+                      },
+                      "version": {
+                        "type": "string"
+                      },
+                      "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                      }
+                    }
+                  }
+                }
+              },
+              "description": "Service is healthy"
+            }
+          }
+        }
+      },
+      "/users/me": {
+        "get": {
+          "tags": [
+            "Users"
+          ],
+          "summary": "Get current user profile",
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "responses": {
+            "200": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/User"
+                  }
+                }
+              },
+              "description": "Current user profile"
+            },
+            "401": {
+              "$ref": "#/components/responses/Unauthorized"
+            }
+          }
+        },
+        "patch": {
+          "tags": [
+            "Users"
+          ],
+          "summary": "Update current user profile",
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "responses": {
+            "200": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/User"
+                  }
+                }
+              },
+              "description": "Profile updated"
+            },
+            "400": {
+              "$ref": "#/components/responses/BadRequest"
+            },
+            "401": {
+              "$ref": "#/components/responses/Unauthorized"
+            }
+          },
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateProfileRequest"
+                }
+              }
+            },
+            "required": true
+          }
+        }
+      },
+      "/auth/login": {
+        "post": {
+          "tags": [
+            "Authentication"
+          ],
+          "summary": "User login",
+          "responses": {
+            "200": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/AuthResponse"
+                  }
+                }
+              },
+              "description": "Login successful"
+            },
+            "400": {
+              "$ref": "#/components/responses/BadRequest"
+            },
+            "401": {
+              "$ref": "#/components/responses/Unauthorized"
+            }
+          },
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "email",
+                    "password"
+                  ],
+                  "properties": {
+                    "email": {
+                      "type": "string",
+                      "format": "email"
+                    },
+                    "password": {
+                      "type": "string",
+                      "minLength": 8
+                    }
+                  }
+                }
+              }
+            },
+            "required": true
+          }
+        }
+      },
+      "/users/{id}": {
+        "get": {
+          "tags": [
+            "Users"
+          ],
+          "summary": "Get user by ID",
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "responses": {
+            "200": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/User"
+                  }
+                }
+              },
+              "description": "User found"
+            },
+            "401": {
+              "$ref": "#/components/responses/Unauthorized"
+            },
+            "403": {
+              "$ref": "#/components/responses/Forbidden"
+            },
+            "404": {
+              "$ref": "#/components/responses/NotFound"
+            }
+          },
+          "parameters": [
+            {
+              "in": "path",
+              "name": "id",
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "required": true
+            }
+          ]
+        },
+        "put": {
+          "tags": [
+            "Users"
+          ],
+          "summary": "Update user",
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "responses": {
+            "200": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/User"
+                  }
+                }
+              },
+              "description": "User updated"
+            },
+            "400": {
+              "$ref": "#/components/responses/BadRequest"
+            },
+            "401": {
+              "$ref": "#/components/responses/Unauthorized"
+            },
+            "403": {
+              "$ref": "#/components/responses/Forbidden"
+            },
+            "404": {
+              "$ref": "#/components/responses/NotFound"
+            }
+          },
+          "parameters": [
+            {
+              "in": "path",
+              "name": "id",
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "required": true
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateUserRequest"
+                }
+              }
+            },
+            "required": true
+          }
+        },
+        "delete": {
+          "tags": [
+            "Users"
+          ],
+          "summary": "Delete user",
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "User deleted"
+            },
+            "401": {
+              "$ref": "#/components/responses/Unauthorized"
+            },
+            "403": {
+              "$ref": "#/components/responses/Forbidden"
+            },
+            "404": {
+              "$ref": "#/components/responses/NotFound"
+            }
+          },
+          "parameters": [
+            {
+              "in": "path",
+              "name": "id",
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "required": true
+            }
+          ]
+        }
+      },
+      "/auth/logout": {
+        "post": {
+          "tags": [
+            "Authentication"
+          ],
+          "summary": "User logout",
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Logout successful"
+            },
+            "401": {
+              "$ref": "#/components/responses/Unauthorized"
+            }
+          }
+        }
+      },
+      "/auth/refresh": {
+        "post": {
+          "tags": [
+            "Authentication"
+          ],
+          "summary": "Refresh access token",
+          "responses": {
+            "200": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/AuthResponse"
+                  }
+                }
+              },
+              "description": "Token refreshed"
+            },
+            "401": {
+              "$ref": "#/components/responses/Unauthorized"
+            }
+          },
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "refreshToken"
+                  ],
+                  "properties": {
+                    "refreshToken": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            },
+            "required": true
+          }
+        }
+      },
+      "/users/me/password": {
+        "patch": {
+          "tags": [
+            "Users"
+          ],
+          "summary": "Change password",
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Password changed"
+            },
+            "400": {
+              "$ref": "#/components/responses/BadRequest"
+            },
+            "401": {
+              "$ref": "#/components/responses/Unauthorized"
+            }
+          },
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "currentPassword",
+                    "newPassword"
+                  ],
+                  "properties": {
+                    "newPassword": {
+                      "type": "string",
+                      "minLength": 8
+                    },
+                    "currentPassword": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            },
+            "required": true
+          }
+        }
+      }
+    },
+    "openapi": "3.0.0",
+    "servers": [
+      {
+        "url": "/api/v1"
+      }
+    ],
+    "components": {
+      "schemas": {
+        "User": {
+          "type": "object",
+          "required": [
+            "id",
+            "email",
+            "firstName",
+            "lastName",
+            "role",
+            "isActive",
+            "createdAt",
+            "updatedAt"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "role": {
+              "enum": [
+                "admin",
+                "user"
+              ],
+              "type": "string"
+            },
+            "email": {
+              "type": "string",
+              "format": "email"
+            },
+            "isActive": {
+              "type": "boolean"
+            },
+            "lastName": {
+              "type": "string",
+              "maxLength": 100,
+              "minLength": 1
+            },
+            "createdAt": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "firstName": {
+              "type": "string",
+              "maxLength": 100,
+              "minLength": 1
+            },
+            "updatedAt": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "lastLoginAt": {
+              "type": "string",
+              "format": "date-time",
+              "nullable": true
+            }
+          }
+        },
+        "Pagination": {
+          "type": "object",
+          "required": [
+            "page",
+            "limit",
+            "total",
+            "pages"
+          ],
+          "properties": {
+            "page": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "pages": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "total": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "AuthResponse": {
+          "type": "object",
+          "required": [
+            "accessToken",
+            "refreshToken",
+            "user"
+          ],
+          "properties": {
+            "user": {
+              "$ref": "#/components/schemas/User"
+            },
+            "expiresIn": {
+              "type": "integer"
+            },
+            "accessToken": {
+              "type": "string"
+            },
+            "refreshToken": {
+              "type": "string"
+            }
+          }
+        },
+        "ErrorResponse": {
+          "type": "object",
+          "required": [
+            "error",
+            "message"
+          ],
+          "properties": {
+            "error": {
+              "type": "string"
+            },
+            "details": {
+              "type": "object"
+            },
+            "message": {
+              "type": "string"
+            }
+          }
+        },
+        "UserListResponse": {
+          "type": "object",
+          "required": [
+            "data",
+            "pagination"
+          ],
+          "properties": {
+            "data": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/User"
+              }
+            },
+            "pagination": {
+              "$ref": "#/components/schemas/Pagination"
+            }
+          }
+        },
+        "CreateUserRequest": {
+          "type": "object",
+          "required": [
+            "email",
+            "firstName",
+            "lastName",
+            "password",
+            "role"
+          ],
+          "properties": {
+            "role": {
+              "enum": [
+                "admin",
+                "user"
+              ],
+              "type": "string"
+            },
+            "email": {
+              "type": "string",
+              "format": "email"
+            },
+            "isActive": {
+              "type": "boolean",
+              "default": true
+            },
+            "lastName": {
+              "type": "string",
+              "maxLength": 100,
+              "minLength": 1
+            },
+            "password": {
+              "type": "string",
+              "minLength": 8
+            },
+            "firstName": {
+              "type": "string",
+              "maxLength": 100,
+              "minLength": 1
+            }
+          }
+        },
+        "UpdateUserRequest": {
+          "type": "object",
+          "properties": {
+            "role": {
+              "enum": [
+                "admin",
+                "user"
+              ],
+              "type": "string"
+            },
+            "email": {
+              "type": "string",
+              "format": "email"
+            },
+            "isActive": {
+              "type": "boolean"
+            },
+            "lastName": {
+              "type": "string",
+              "maxLength": 100,
+              "minLength": 1
+            },
+            "firstName": {
+              "type": "string",
+              "maxLength": 100,
+              "minLength": 1
+            }
+          }
+        },
+        "UpdateProfileRequest": {
+          "type": "object",
+          "properties": {
+            "lastName": {
+              "type": "string",
+              "maxLength": 100,
+              "minLength": 1
+            },
+            "firstName": {
+              "type": "string",
+              "maxLength": 100,
+              "minLength": 1
+            }
+          }
+        }
+      },
+      "responses": {
+        "Conflict": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          },
+          "description": "Resource already exists"
+        },
+        "NotFound": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          },
+          "description": "Resource not found"
+        },
+        "Forbidden": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          },
+          "description": "Insufficient permissions"
+        },
+        "BadRequest": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          },
+          "description": "Invalid request"
+        },
+        "Unauthorized": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          },
+          "description": "Authentication required"
+        },
+        "InternalServerError": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          },
+          "description": "Internal server error"
+        }
+      },
+      "securitySchemes": {
+        "bearerAuth": {
+          "type": "http",
+          "scheme": "bearer",
+          "bearerFormat": "JWT"
+        }
+      }
+    }
+  },
+  "architecture": {
+    "caching": "Redis for sessions and rate limiting",
+    "logging": "Structured JSON logging with request correlation IDs",
+    "pattern": "RESTful API with PostgreSQL",
+    "database": "PostgreSQL 14+",
+    "security": [
+      "Hash passwords with bcrypt (minimum 12 rounds)",
+      "Validate JWT tokens on protected routes",
+      "Implement CSRF protection if using cookies",
+      "Use HTTPS in production",
+      "Sanitize user inputs",
+      "Implement rate limiting per IP and user",
+      "Log security events for auditing"
+    ],
+    "monitoring": "Health checks and metrics endpoints",
+    "fileStorage": "S3-compatible storage for future file uploads",
+    "recommendations": [
+      "Use connection pooling for database connections",
+      "Implement request/response logging middleware",
+      "Add CORS middleware for browser clients",
+      "Use environment variables for configuration",
+      "Implement graceful shutdown handling",
+      "Add database migration system",
+      "Use UUID v4 for all primary keys",
+      "Implement soft delete for users if needed",
+      "Add input validation middleware",
+      "Use transaction management for data consistency"
+    ]
+  },
+  "authentication": {
+    "roles": [
+      "admin",
+      "user"
+    ],
+    "strategy": "JWT",
+    "permissions": {
+      "user": [
+        "profile:read",
+        "profile:write"
+      ],
+      "admin": [
+        "user:read",
+        "user:write",
+        "user:delete",
+        "system:admin"
+      ]
+    },
+    "tokenExpiry": "15m",
+    "jwtAlgorithm": "HS256",
+    "rateLimiting": {
+      "api": {
+        "window": "1h",
+        "requests": 1000
+      },
+      "login": {
+        "window": "15m",
+        "requests": 5
+      }
+    },
+    "hashAlgorithm": "bcrypt",
+    "refreshTokenExpiry": "7d"
+  },
+  "databaseSchema": {
+    "tables": [
+      {
+        "name": "users",
+        "columns": [
+          {
+            "name": "id",
+            "type": "UUID",
+            "default": "gen_random_uuid()",
+            "primary": true
+          },
+          {
+            "name": "email",
+            "type": "VARCHAR(255)",
+            "unique": true,
+            "nullable": false
+          },
+          {
+            "name": "password_hash",
+            "type": "VARCHAR(255)",
+            "nullable": false
+          },
+          {
+            "name": "first_name",
+            "type": "VARCHAR(100)",
+            "nullable": false
+          },
+          {
+            "name": "last_name",
+            "type": "VARCHAR(100)",
+            "nullable": false
+          },
+          {
+            "name": "role",
+            "type": "VARCHAR(50)",
+            "default": "user",
+            "nullable": false
+          },
+          {
+            "name": "is_active",
+            "type": "BOOLEAN",
+            "default": true,
+            "nullable": false
+          },
+          {
+            "name": "last_login_at",
+            "type": "TIMESTAMP",
+            "nullable": true
+          },
+          {
+            "name": "created_at",
+            "type": "TIMESTAMP",
+            "default": "CURRENT_TIMESTAMP",
+            "nullable": false
+          },
+          {
+            "name": "updated_at",
+            "type": "TIMESTAMP",
+            "default": "CURRENT_TIMESTAMP",
+            "nullable": false
+          }
+        ],
+        "indexes": [
+          {
+            "unique": true,
+            "columns": [
+              "email"
+            ]
+          },
+          {
+            "unique": false,
+            "columns": [
+              "role"
+            ]
+          },
+          {
+            "unique": false,
+            "columns": [
+              "is_active"
+            ]
+          },
+          {
+            "unique": false,
+            "columns": [
+              "created_at"
+            ]
+          }
+        ],
+        "constraints": [
+          {
+            "type": "CHECK",
+            "definition": "role IN ('admin', 'user')"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "name": "refresh_tokens",
+        "columns": [
+          {
+            "name": "id",
+            "type": "UUID",
+            "default": "gen_random_uuid()",
+            "primary": true
+          },
+          {
+            "name": "user_id",
+            "type": "UUID",
+            "nullable": false
+          },
+          {
+            "name": "token_hash",
+            "type": "VARCHAR(255)",
+            "nullable": false
+          },
+          {
+            "name": "expires_at",
+            "type": "TIMESTAMP",
+            "nullable": false
+          },
+          {
+            "name": "created_at",
+            "type": "TIMESTAMP",
+            "default": "CURRENT_TIMESTAMP",
+            "nullable": false
+          },
+          {
+            "name": "revoked_at",
+            "type": "TIMESTAMP",
+            "nullable": true
+          }
+        ],
+        "indexes": [
+          {
+            "unique": false,
+            "columns": [
+              "user_id"
+            ]
+          },
+          {
+            "unique": true,
+            "columns": [
+              "token_hash"
+            ]
+          },
+          {
+            "unique": false,
+            "columns": [
+              "expires_at"
+            ]
+          }
+        ],
+        "foreignKeys": [
+          {
+            "column": "user_id",
+            "onDelete": "CASCADE",
+            "references": "users(id)"
+          }
+        ]
+      },
+      {
+        "name": "audit_logs",
+        "columns": [
+          {
+            "name": "id",
+            "type": "UUID",
+            "default": "gen_random_uuid()",
+            "primary": true
+          },
+          {
+            "name": "user_id",
+            "type": "UUID",
+            "nullable": true
+          },
+          {
+            "name": "action",
+            "type": "VARCHAR(100)",
+            "nullable": false
+          },
+          {
+            "name": "resource_type",
+            "type": "VARCHAR(100)",
+            "nullable": false
+          },
+          {
+            "name": "resource_id",
+            "type": "VARCHAR(255)",
+            "nullable": true
+          },
+          {
+            "name": "details",
+            "type": "JSONB",
+            "nullable": true
+          },
+          {
+            "name": "ip_address",
+            "type": "INET",
+            "nullable": true
+          },
+          {
+            "name": "user_agent",
+            "type": "TEXT",
+            "nullable": true
+          },
+          {
+            "name": "created_at",
+            "type": "TIMESTAMP",
+            "default": "CURRENT_TIMESTAMP",
+            "nullable": false
+          }
+        ],
+        "indexes": [
+          {
+            "unique": false,
+            "columns": [
+              "user_id"
+            ]
+          },
+          {
+            "unique": false,
+            "columns": [
+              "action"
+            ]
+          },
+          {
+            "unique": false,
+            "columns": [
+              "resource_type"
+            ]
+          },
+          {
+            "unique": false,
+            "columns": [
+              "created_at"
+            ]
+          }
+        ],
+        "foreignKeys": [
+          {
+            "column": "user_id",
+            "onDelete": "SET NULL",
+            "references": "users(id)"
+          }
+        ]
+      }
+    ]
+  }
+}
